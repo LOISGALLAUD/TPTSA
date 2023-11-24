@@ -1,8 +1,12 @@
 # **TP Traitement des Signaux Aléatoires**
 
 <!-- markdownlint-disable MD033 -->
+<img src="image/readme/1700847690924.png" alt="1700847690924" width=150 align="right">
 
 Ce répertoire contient les codes sources MATLAB des TPs de Traitement des Signaux Aléatoires au programme des 2ème année de Télécom Physique Strasbourg.
+Consiste en l'analyse des signaux aléatoires sinusoïdaux et bruits.
+
+<img src="image/readme/1700847794823.png" alt="1700847810842" width=70 align="right">
 
 ## **TP1: Signaux aléatoires sinusoïdaux et bruits**
 
