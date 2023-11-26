@@ -19,3 +19,6 @@ Consiste en l'analyse des signaux aléatoires sinusoïdaux et bruits.
 |<img src="image/readme/1700766897322.png" alt="1700766897322" width=250>|<img src="image/readme/1700768152722.png" alt="1700768152722" width=250>|
 
 ## **TP2: _A suivre..._**
+
+![1700859736098](image/readme/1700859736098.png) bruit sinusoidal bruité
+![1700860403085](image/readme/1700860403085.png) pour differentes valeurs de rsb
