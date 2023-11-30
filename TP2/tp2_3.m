@@ -1,75 +1,56 @@
-% TP 2. Traitement des signaux alÈatoires
-% DÈtection d'un signal pÈriodique bruitÈ (de pÈriode inconnue) par intercorrÈlation
-% avec un signal auxiliaire de mÍme pÈriode
-% Vincent.Mazet@unistra.fr, 2011, modifiÈ F. Heitz 2015
-
-clear all;
+%% TP2 TSA: d√©tection de signaux noy√©s dans du bruit
+% Lo√Øs Gallaud 2A g√©n√©
+clear; clc;
 close all;
+%% 3- Pratique: signaux bruit√©s inconnus donn√©s
+% D√©terminer la fr√©quence du signal original
 
-%% Tests sur les signaux donnÈs
+% Fr√©quences √† tester
+frequencies = 1:0.1:30;
+numFrequencies = length(frequencies);
 
-a = 1;
-f0 = 18;
-Te = 10e-3;
+% Charger et analyser chaque fichier de signal
+fileNames = {'sig2-1.mat', 'sig2-2.mat', 'sig2-3.mat'};
 
-f1 = 1:0.1:30;
-t = 0:Te:1;
-I = length(f1);
-Ryz = zeros(I,1);
+for fileIdx = 1:length(fileNames)
+    % Charger le fichier
+    load(fileNames{fileIdx}, 'y', 'Te', 'T_final');
 
-% FrÈquence du signal sig2-1.mat
-load('sig2-1.mat');
-figure;
-plot(t,y,'b');
-title(['Signal sig2-1.mat']);
-xlabel('t (s)');
-for i = 1:I,
-    z = sin(2*pi*f1(i)*t);
-    [c,lags] = xcorr(y,z);
-    cmax = max(c);
-    Ryz(i) = cmax;
-end;
-figure;
-plot(f1,Ryz,'b-');
-[~,imax] = max(Ryz);
-title(['sig2-1.mat : f0 = ' num2str(f1(imax)) ' Hz']);
-xlabel('f (Hz)');
-ylabel('IntercorrÈlations max');
+    % Temps
+    t = 0:Te:T_final;
 
-% FrÈquence du signal sig2-2.mat
-load('sig2-2.mat');
-figure;
-plot(t,y,'b');
-title(['Signal sig2-2.mat']);
-xlabel('t (s)');
-for i = 1:I,
-    z = sin(2*pi*f1(i)*t);
-    [c,lags] = xcorr(y,z);
-    cmax = max(c);
-    Ryz(i) = cmax;
-end;
-figure;
-plot(f1,Ryz,'b-');
-[~,imax] = max(Ryz);
-title(['sig2-2.mat : f0 = ' num2str(f1(imax)) ' Hz']);
-xlabel('f (Hz)');
-ylabel('IntercorrÈlations max');
+    % Pr√©parer les donn√©es pour les graphiques
+    Ryz = zeros(numFrequencies, 1);
 
-% FrÈquence du signal sig2-3.mat
-load('sig2-3.mat');
-figure;
-plot(t,y,'b');
-title(['Signal sig2-3.mat']);
-xlabel('t (s)');
-for i = 1:I,
-    z = sin(2*pi*f1(i)*t);
-    [c,lags] = xcorr(y,z);
-    cmax = max(c);
-    Ryz(i) = cmax;
-end;
-figure;
-plot(f1,Ryz,'b-');
-[~,imax] = max(Ryz);
-title(['sig2-3.mat : f0 = ' num2str(f1(imax)) ' Hz']);
-xlabel('f (Hz)');
-ylabel('IntercorrÈlations max');
+    % Calculer les intercorrelations pour chaque fr√©quence
+    for i = 1:numFrequencies
+        z = sin(2*pi*frequencies(i)*t);
+        [c, ~] = xcorr(y, z, 'biased');
+        Ryz(i) = max(c);
+    end
+
+    % Trouver la fr√©quence dominante
+    [~, imax] = max(Ryz);
+    dominantFrequency = frequencies(imax);
+
+    % Afficher les r√©sultats dans une seule figure avec deux subplots
+    figure;
+
+    % Subplot 1 : Signal temporel
+    subplot(2, 1, 1);
+    plot(t, y, 'b');
+    title(['Signal ' fileNames{fileIdx}]);
+    xlabel('t (s)');
+
+    % Subplot 2 : Recherche de fr√©quence
+    subplot(2, 1, 2);
+    plot(frequencies, Ryz, 'b-');
+    hold on;
+    plot(dominantFrequency, Ryz(imax), 'ro');
+    title(['Fr√©quence dominante : f0 = ' num2str(dominantFrequency) ' Hz']);
+    xlabel('f (Hz)');
+    ylabel('Intercorr√©lations max');
+    legend('Intercorr√©lations', 'Fr√©quence dominante', 'Location', 'northwest');
+
+    hold off;
+end

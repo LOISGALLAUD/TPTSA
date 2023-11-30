@@ -1,39 +1,46 @@
-% TP 2. Traitement des signaux alÈatoires
-% DÈtection d'un signal pÈriodique bruitÈ (de pÈriode inconnue) par intercorrÈlation
-% avec un signal auxiliaire de m?me pÈriode
-% Vincent.Mazet@unistra.fr, 2011, modifiÈ F. Heitz 2015
-
-clear all;
+%% TP2 TSA: d√©tection de signaux noy√©s dans du bruit
+% Lo√Øs Gallaud 2A g√©n√©
+clear; clc;
 close all;
+%% 2- Cas d'un signal p√©riodique bruit√© de fr√©quence inconnue
+%% Signal de p√©riode inconnue
 
-
-%% Signal de pÈriode inconnue
-
-a = ##;
-f0 = ##;  % supposÈe inconnue
-Te = ##;
-t = ##;
-phi=##;
-x = ##;
+% Param√®tres du signal
+a = 1;
+f0 = 10; % suppos√©e inconnue
+Te = 1e-3;
+t = 0:Te:1;
+phi = pi;
+x = a * sin(2*pi*f0.*t + phi);
 
 % Bruit
-rsb = ##;
-sig = ##;
-b = ##;
+rsb = 0; % A faire varier
+sig = sqrt(a^2/2 * power(10, -rsb/10)); % √©cart-type du bruit
+b = sig * randn(size(x)); % vecteur de bruit de m√™me taille que x
 
-% Signal bruitÈ
-y = ##;
+% Signal bruit√©
+y = x + b;
+figure;
+plot(t, y, 'b', t, x, 'r');
+title(['Signal de fr√©quence suppos√©e inconnue (f0 = ' num2str(f0) ' Hz,' ...
+    ' RSB = ' num2str(rsb) ' dB)']);
+xlabel('t (s)');
+legend('y(t)', 'x(t)');
+
+% Analyse de l'intercorr√©lation pour estimer la fr√©quence du signal
+frequencies = 1:0.1:30;
+maxCorrelations = zeros(length(frequencies), 1);
 figure;
 plot(t,y,'b',t,x,'r');
-title(['Signal de fr?quence suppos?e inconnue (f0 = ' num2str(f0) ' Hz, RSB = ' num2str(rsb) ' dB)']);
+title(['Signal de fr?quence suppos?e inconnue (f0 = ' num2str(f0) ' Hz,' ...
+    ' RSB = ' num2str(rsb) ' dB)']);
 xlabel('t (s)');
 legend('y(t)','x(t)');
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% IntercorrÈlation avec une sinusoÔde de frÈquence f1 variant de 1 ‡ 30 Hz
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Intercorr√©lation avec une sinuso√Øde avec f1 variant de 1 √© 30 Hz
+% Code √©crit par Vincent Mazet TPS
 
 % Figure
 h = figure;
@@ -41,7 +48,8 @@ ss = get(0,'ScreenSize');
 fp = get(h,'Position');
 set(h,'Position',[fp(1) 50 fp(3) ss(4)-150]);
 twait = annotation('textbox',[0 0 1 1],...
-    'String','Pour lancer le balayage en frÈquence : appuyez sur une touche',...
+    'String',['Pour lancer le balayage en fr√©quence :' ...
+    ' appuyez sur une touche'],...
     'FontSize',14,...
     'HorizontalAlignment','center',...
     'VerticalAlignment','middle',...
@@ -50,108 +58,89 @@ pause;
 delete(twait)
 
 
-% Parcours des frÈquences de 1 ‡ 30 Hz  par pas de 0.1 Hz
+% Parcours des fr√©quences de 1 √© 30 Hz  par pas de 0.1 Hz
 f1 = 1:0.1:30;
 I = length(f1);
 Ryz = zeros(I,1);
 for i = 1:I,
-    
-    % Sinuso?de z de frÈquence f1(i)
     z = sin(2*pi*f1(i)*t);
-    
-    % IntercorrÈlation Ryz
     [c,lags] = xcorr(y,z,'biased');
-    
-    % Recherche de la valeur max de l'intercorrÈlation Ryz   
     [cmax,imax] = max(c);
     Ryz(i) = cmax;
-    
+   
     figure(h);
-    
-  
     % z
     subplot(4,1,1);
     plot(t,z,'r');
-    title(['Signal auxiliaire z(t) de frÈquence f1 = ' num2str(f1(i)) ' Hz ']);
+    title(['Signal auxiliaire z(t) de fr√©quence f1 = ' ...
+        num2str(f1(i)) ' Hz ']);
     xlabel('t (s)');
     ylabel('z(t)');
-  
-    
      % y et z(t-taumax)
     taumax=lags(imax)*Te;
     zdecal=sin(2*pi*f1(i)*(t-taumax));
    
     subplot(4,1,2);      
         plot(t,y,'b',t,zdecal,'r');
-        title(['Signal y(t) de frÈquence inconnue (en bleu) et z(t-taumax)(en rouge) avec taumax=' num2str(taumax*1e3) ' ms']);
+        title(['Signal y(t) de fr√©quence inconnue (en bleu)' ...
+            ' et z(t-taumax)(en rouge) avec taumax=' ...
+            num2str(taumax*1e3) ' ms']);
         xlabel('t (s)');
         legend('y(t)','z(t-taumax)');
-    
-    
-    % IntercorrÈlation Ryz(tau)
+    % Intercorr√©lation Ryz(tau)
     lags = lags*Te ; 
     subplot(4,1,3);
     plot( lags,c,'b-' , lags(imax),cmax,'r*' );
-    title(['IntercorrÈlation Ryz(tau)']);
+    title(['Intercorr√©lation Ryz(tau)']);
     axis([lags(1) lags(end) -0.7 0.7]);
     xlabel('tau (s)');
     ylabel(['Ryz (f1 = ' num2str(f1(i)) ' Hz)']);
-    
-    % Valeurs maximales de l'intercorrÈlation en fonction de f1
+    % Valeurs maximales de l'intercorr√©lation en fonction de f1
     subplot(4,1,4);
     plot( f1(1:i),Ryz(1:i),'b-' , f1(i),Ryz(i),'r*' );
-    title(['IntercorrÈlation Ryz max en fonction de f1']);
+    title(['Intercorr√©lation Ryz max en fonction de f1']);
     axis([f1(1) f1(end) 0 1.0]);
     xlabel('f1 (Hz)');
     ylabel('Ryz max.');
-
    
     pause(0.02 + 1.5*exp(-i/20));
-   
-    
 end;
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Recherche du max des max de l'intercorrÈlation 
-% pour les frÈquences de 1 ‡ 30 Hz
+
+%% Recherche du max des max de l'intercorr√©lation 
+% pour les fr√©quences de 1 √© 30 Hz
 % Affichage de la solution 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 [~,imax] = max(Ryz);
 
-% ReprÈsentation de l'intercorrÈlation maximale
+% Repr√©sentation de l'intercorr√©lation maximale
 
-% Sinuso?de z de frÈquence f1(imax)
+% Sinuso?de z de fr√©quence f1(imax)
     z = sin(2*pi*f1(imax)*t);
     
-    % IntercorrÈlation Ryz
+    % Intercorr√©lation Ryz
     [c,lags] = xcorr(y,z,'biased');
     
-    % Recherche de la valeur max de l'intercorrÈlation Ryz   
+    % Recherche de la valeur max de l'intercorr√©lation Ryz   
     [cmax,jmax] = max(c);
     
     figure(3);
-    
     % z
     subplot(4,1,1);
     plot(t,z,'r');
     title(['Signal auxiliaire z(t) de fr?quence f1 = ' num2str(f1(imax)) ' Hz ']);
     xlabel('t (s)');
     ylabel('z(t)');
-    
     % y et z(t-taumax)
     taumax=lags(jmax)*Te;
     zdecal=sin(2*pi*f1(imax)*(t-taumax));
-      
     subplot(4,1,2);      
         plot(t,y,'b',t,zdecal,'r');
         title(['Signal y(t) de fr?quence inconnue (en bleu) et z(t-taumax)(en rouge) avec taumax=' num2str(taumax*1e3) ' ms']);
         xlabel('t (s)');
         legend('y(t)','z(t-taumax)');
-
-    
-    % IntercorrÈlation Ryz(tau)
+    % Intercorr√©lation Ryz(tau)
     subplot(4,1,3);
     lags = lags*Te ; 
     plot( lags,c,'b-' , lags(jmax),cmax,'r*' );
@@ -159,18 +148,17 @@ end;
     axis([lags(1) lags(end) -0.7 0.7]);
     xlabel('t (s)');
     ylabel(['Ryz (f1 = ' num2str(f1(imax)) ' Hz)']);
-    
-    % Valeurs maximales de l'intercorrÈlation en fonction de f1
+    % Valeurs maximales de l'intercorr√©lation en fonction de f1
     subplot(4,1,4);
     plot( f1(1:i),Ryz(1:i),'b-' , f1(imax),Ryz(imax),'r*' );
     title(['Intercorr?lation Ryz max en fonction de f1']);
     axis([f1(1) f1(end) 0 0.7]);
     xlabel('f1 (Hz)');
     ylabel('Ryz max.');
-    
     twait = annotation('textbox',[0 0 1 .1],...
     'String',['fr?quence f0 estim?e pour le signal inconnu = ' num2str(f1(imax)) ' Hz'],...
     'FontSize',16,...
     'HorizontalAlignment','center',...
     'VerticalAlignment','middle',...
     'LineStyle','none');
+

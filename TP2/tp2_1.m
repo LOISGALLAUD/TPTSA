@@ -1,110 +1,86 @@
-% TP 2. Traitement des signaux aléatoires
-% Détection d'un signal périodique bruité par intercorrélation
-% avec un signal auxiliaire de même période
-% Vincent.Mazet@unistra.fr, 2011, modifié F. Heitz 2015, modifié C.Meillier
-% 2018
-
-clear all;
+%% TP2 TSA: dÃ©tection de signaux noyÃ©s dans du bruit
+% LoÃ¯s Gallaud 2A gÃ©nÃ©
+clear; clc;
 close all;
+%% 1 - DÃ©tection d'un signal pÃ©riodique de pÃ©riode connue pas une 
+% intercorrÃ©lation avec un signal auxiliaire
 
+% DÃ©finition des constantes
+a = 1;
+f0 = 10;
+Te = 1e-3;
+phi= pi;
 
-%% Signal de fréquence connue
+% DiscrÃ©tisation du temps
+t = 0:Te:1; % 1s Ã©chantillonnÃ©e avec un pas de Te secondes
+size(t);
+x = a * sin(2*pi*f0 .* t + phi);
 
-a = ###;
-f0 = ###;
-Te = ###;
-t = ###;
-phi=###;
-x = ###;
+% GÃ©nÃ©ration du bruit
+rsb = 0; % A faire varier
+sig = sqrt(a^2/2 * power(10, -rsb/10));  % Ã©cart-type du bruit
+b = sig * randn(size(x));  % vecteur de bruit de mÃªme taille que x
 
-% Bruit
-rsb = ###;
-sig = ###;
-b = ###;
+% 2. GÃ©nÃ©ration du signal bruitÃ©
+y = x + b;
 
-% Signal bruité
-y = ###;
 figure;
-plot(t,y,'b',t,x,'r');
-title(['Signal de fréquence supposée connue (f0 = ' num2str(f0) ' Hz, RSB = ' num2str(rsb) ' dB)']);
+subplot(6,1,1);
+plot(t,y,'b');
+title(['Signal de frÃ©quence (f0 = ' num2str(f0) ' Hz, RSB = ' num2str(rsb) ' dB)']);
 xlabel('t (s)');
 legend('y(t)','x(t)');
 
-pause(5);
-
-
-
-%% Intercorrélation avec une sinusoïde de fréquence f1=f0
-
+% 3. DÃ©tection d'un signal dans le bruit
 f1 = f0;
-
-figure;
-
-% Signal bruité y(t)
-
-subplot(6,1,1);
-plot(t,y);
-title(['Signal bruité y(t), RSB = ' num2str(rsb) ' dB']);
-axis([-inf inf -inf inf]);
-xlabel('t (s)');
-ylabel('y(t)');
-
-% Sinusoïde z de fréquence f1
-z = ###;
+z = a * sin(2*pi*f1 .* t); % signal de mÃªme frÃ©quence que le signal bruitÃ©
 
 subplot(6,1,2);
-plot(t,z,'r');
-title(['Signal auxiliaire z(t) de fréquence f1=f0= ' num2str(f0) ' Hz ']);
+plot(t,z,'b',t,x,'r');
+title(['Signal auxiliaire z(t) de frÃ©quence f1=f0= ' num2str(f0) ' Hz ']);
 xlabel('t (s)');
 ylabel('z(t)');
 
-%Intercorrélation Rbz
-% Compléter les lignes suivantes
-[c,lags] = ###
-lags = ### % Retard en secondes ! 
+% IntercorrÃ©lation Rbz: signal absent
+[c, lags] = xcorr(b, z, "biased"); % Calcul de l'intercorrÃ©lation entre b et z
+lags = lags * Te; % Conversion des dÃ©calages en secondes
 
-subplot(6,1,3);
-plot( lags,c,'b-');
-title(['Intercorrélation Rbz(tau) : bruit seul (signal absent) - signal aux']);
-axis([lags(1) lags(end) -0.7 0.7]);
-xlabel('tau (s)');
-ylabel(['Rbz']);
+subplot(6, 1, 3);
+plot(lags, c, 'b-');
+title(['IntercorrÃ©lation Rbz(\tau) : bruit seul (signal absent) - signal aux']);
+xlabel('\tau (s)');
+ylabel('Rbz');
 
-%Intercorrélation Rxz
-% Compléter les lignes suivantes
-[c,lags] = ###
-lags = ### % Retard en secondes ! 
+% IntercorrÃ©lation Rxz: signal prÃ©sent sans bruit
+[c, lags] = xcorr(x, z, "biased"); % Calcul de l'intercorrÃ©lation entre x et z
+lags = lags * Te; % Conversion des dÃ©calages en secondes
 
-subplot(6,1,4);
-plot( lags,c,'b-');
-title(['Intercorrélation Rxz(tau) : signal sans bruit-signal aux']);
-axis([lags(1) lags(end) -0.7 0.7]);
-xlabel('tau (s)');
-ylabel(['Rxz']);
+subplot(6, 1, 4);
+plot(lags, c, 'b-');
+title(['IntercorrÃ©lation Rxz(\tau) : signal sans bruit - signal aux']);
+xlabel('\tau (s)');
+ylabel('Rxz');
 
-% Intercorrélation Ryz
-% Compléter les lignes suivantes
-[c,lags] = ###
-lags = ### % Retard en secondes ! 
+% IntercorrÃ©lation Ryz: signal prÃ©sent dans le bruit
+[c, lags] = xcorr(y, z, "biased"); % Calcul de l'intercorrÃ©lation entre y et z
+lags = lags * Te; % Conversion des dÃ©calages en secondes
 [cmax,imax] = max(c);
 
 subplot(6,1,5);
 plot( lags,c,'b-',lags(imax),cmax,'r*');
-title(['Intercorrélation Ryz(tau) : signal bruité-signal aux']);
+title(['IntercorrÃ©lation Ryz(tau) : signal bruitÃ©-signal aux']);
 axis([lags(1) lags(end) -0.7 0.7]);
 xlabel('tau (s)');
 ylabel(['Ryz']);
 
 
-%% Détermination du décalage taumax entre y(t) et z(t)
-% Compléter la ligne suivante
-taumax=###
+%% DÃ©termination du dÃ©calage taumax entre y(t) et z(t)
+taumax = lags(imax);
 % z(t-taumax)
-zdecal=###;
+zdecal = a * sin(2*pi*f0 .* (t-taumax));
 % affichage y et z(t-taumax)
 subplot(6,1,6);      
 plot(t,y,'b',t,zdecal,'r');
-title(['Signal y(t) de fréquence connue (en bleu) et z(t-taumax)(en rouge) avec taumax=' num2str(taumax*1e3) ' ms']);
-axis([-inf inf -inf inf]);
-xlabel('t (s)');
-legend('y(t)','z(t-taumax)');
+title(['Signal y(t) de frÃ©quence connue (en bleu) et z(t-taumax)' ...
+    '(en rouge) avec taumax=' num2str(taumax*1e3) ' ms']);
+
