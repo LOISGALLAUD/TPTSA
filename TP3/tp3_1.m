@@ -17,7 +17,7 @@ t0 = 2;
 % Signal à reconnaître (motif ou "template") x
 x = (1-t/T) .* ((t)>=0) .* ((t)<=T);
 % Réponse impulsionnelle du filtre adapté causal
-h = (1-(T-t)/T) .* ((t)>=0) .* ((t)<=T);
+h = (1-(T-t)/T) .* ((T-t)>=0) .* ((T-t)<=T);
 
 % Signal bruité
 xdecal = (1-(t-t0)/T) .* ((t-t0)>=0) .* ((t-t0)<=T);

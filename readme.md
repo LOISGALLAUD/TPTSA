@@ -73,10 +73,25 @@ La détection de galaxies lointaines est l’une des tâches pour lequel l’ins
 
 Peut-on assimiler ces spectres à des bruits blancs ? Voici l'intercorrélation de deux spectres de deux pixels différents:
 
-![1701469150824](image/readme/1701469150824.png)
+![1701701299328](image/readme/1701701299328.png)
 
 On remarque que l'intercorrélation est quasi-nulle (dû au fait que l'on calcule sur des plages finies), donc les spectres sont non corrélés. On peut donc assimiler ces spectres à des bruits blancs.
 
 ### **Détection de la raie Lyα**
 
 Le centre de la galaxie a été détecté dans le pixel de coordonnées (9, 8). Nous allons essayer de détecter automatiquement la position de la raie Lyα dans le spectre de la galaxie afin de déterminer l’âge de la galaxie. Pour cela nous utiliserons le gabarit de la raie Lyα et la méthode du filtrage adapté.
+
+Les données du cube d'espace donné donne des spectres compris entre 475nm et 930nm. L'univers étant en expansion, la raie d'émission Lyman alpha est décalée vers le rouge et apparaîtra donc dans cette plage de donnée.
+
+![1701705886906](image/readme/1701705886906.png)
+
+En suivant la méthode du filtre adapté, on peut déterminer la position de la raie Lyman alpha. On utilise un gabarit de la raie Lyman alpha, et on le fait glisser sur le spectre de la galaxie. On calcule l'intercorrélation entre le spectre de la galaxie et le gabarit, et on obtient le spectre de sortie du filtre adapté. On cherche le maximum de ce spectre de sortie, qui correspond à la position de la raie Lyman alpha.
+On détecte la raie Lya pour 533.625 nm.
+
+On réitère l'opération avec avec le spectre moyen de la galaxie, et on obtient le même résultat.
+
+![1701706492394](image/readme/1701706492394.png)
+
+![1701706548149](image/readme/1701706548149.png)
+
+On détecte au même endroit !
