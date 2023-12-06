@@ -95,3 +95,5 @@ On réitère l'opération avec avec le spectre moyen de la galaxie, et on obtien
 ![1701706548149](image/readme/1701706548149.png)
 
 On détecte au même endroit !
+
+On cherche à présent à calculer le facteur d'amélioration du RSB après moyennage sur les N points: on calcule le RSB avant moyennage, puis on moyenne sur N points, et on recalcule le RSB. On obtient le graphique suivant:
